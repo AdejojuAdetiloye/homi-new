@@ -22,6 +22,14 @@ export const FeaturedProperties = () => {
     setProperties(featured);
   }, []);
 
+  const getPropertyImage = (property: Property) => {
+    if (property.images && property.images.length > 0 && property.images[0]) {
+      return property.images[0];
+    }
+    // Fallback to a placeholder image
+    return `https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&q=80`;
+  };
+
   return (
     <section className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -47,11 +55,16 @@ export const FeaturedProperties = () => {
               transition={{ delay: index * 0.1 }}
             >
               <Card className="overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300">
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-64 overflow-hidden bg-muted">
                   <img
-                    src={property.images[0]}
+                    src={getPropertyImage(property)}
                     alt={property.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&q=80';
+                    }}
                   />
                   <div className="absolute top-4 right-4">
                     <Button

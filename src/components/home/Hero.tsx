@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Home, DollarSign } from 'lucide-react';
+import { Search, MapPin, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -84,10 +84,10 @@ export const Hero = () => {
             <div className="bg-white/95 backdrop-blur p-4 md:p-6 rounded-2xl shadow-2xl mb-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
                   <Select value={location} onValueChange={setLocation}>
-                    <SelectTrigger className="pl-10">
-                      <SelectValue placeholder="Location" />
+                    <SelectTrigger className="pl-10 text-foreground bg-background">
+                      <SelectValue placeholder="Location" className="text-foreground" />
                     </SelectTrigger>
                     <SelectContent>
                       {NIGERIAN_CITIES.map((city) => (
@@ -100,10 +100,10 @@ export const Hero = () => {
                 </div>
 
                 <div className="relative">
-                  <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
                   <Select value={propertyType} onValueChange={setPropertyType}>
-                    <SelectTrigger className="pl-10">
-                      <SelectValue placeholder="Property Type" />
+                    <SelectTrigger className="pl-10 text-foreground bg-background">
+                      <SelectValue placeholder="Property Type" className="text-foreground" />
                     </SelectTrigger>
                     <SelectContent>
                       {PROPERTY_TYPES.map((type) => (
@@ -116,10 +116,10 @@ export const Hero = () => {
                 </div>
 
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground z-10">₦</span>
                   <Select value={priceRange} onValueChange={setPriceRange}>
-                    <SelectTrigger className="pl-10">
-                      <SelectValue placeholder="Price Range" />
+                    <SelectTrigger className="pl-10 text-foreground bg-background">
+                      <SelectValue placeholder="Price Range" className="text-foreground" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="0-500000">Under ₦500k</SelectItem>
