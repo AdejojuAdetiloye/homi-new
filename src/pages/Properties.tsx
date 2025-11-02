@@ -4,19 +4,40 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, MapPin, Home, Bed, Bath, Heart, Grid3x3, List, 
-  SlidersHorizontal, X, ArrowRight, Filter
+import {
+  Search,
+  MapPin,
+  Home,
+  Bed,
+  Bath,
+  Heart,
+  Grid3x3,
+  List,
+  SlidersHorizontal,
+  X,
+  ArrowRight,
+  Filter,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Property } from '@/types';
 import { formatCurrency } from '@/utils/formatters';
-import { NIGERIAN_CITIES, PROPERTY_TYPES, PROPERTY_AMENITIES } from '@/utils/constants';
+import {
+  NIGERIAN_CITIES,
+  PROPERTY_TYPES,
+  PROPERTY_AMENITIES,
+} from '@/utils/constants';
 import { usePropertyStore } from '@/stores/propertyStore';
+import { initializeMockData } from '@/utils/mockData';
 
 const Properties = () => {
   const navigate = useNavigate();
@@ -29,18 +50,25 @@ const Properties = () => {
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedType, setSelectedType] = useState('');
+  const [selectedCity, setSelectedCity] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 10000000]);
-  const [bedrooms, setBedrooms] = useState('');
-  const [bathrooms, setBathrooms] = useState('');
+  const [bedrooms, setBedrooms] = useState('all');
+  const [bathrooms, setBathrooms] = useState('all');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
-    const allProperties: Property[] = JSON.parse(localStorage.getItem('properties') || '[]');
-    setProperties(allProperties.filter(p => p.status === 'available'));
-    
+    // Force initialize mock data if not present
+    if (!localStorage.getItem('homilink_initialized')) {
+      initializeMockData();
+    }
+
+    const allProperties: Property[] = JSON.parse(
+      localStorage.getItem('properties') || '[]'
+    );
+    setProperties(allProperties.filter((p) => p.status === 'available'));
+
     // Apply filters from navigation state if any
     if (location.state?.filters) {
       const filters = location.state.filters;
@@ -57,40 +85,43 @@ const Properties = () => {
 
     // Search query
     if (searchQuery) {
-      filtered = filtered.filter(p =>
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (p) =>
+          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // City filter
-    if (selectedCity) {
-      filtered = filtered.filter(p => p.address.includes(selectedCity));
+    if (selectedCity && selectedCity !== 'all') {
+      filtered = filtered.filter((p) => p.address.includes(selectedCity));
     }
 
     // Property type filter
-    if (selectedType) {
-      filtered = filtered.filter(p => p.propertyType === selectedType);
+    if (selectedType && selectedType !== 'all') {
+      filtered = filtered.filter((p) => p.propertyType === selectedType);
     }
 
     // Price range filter
-    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    filtered = filtered.filter(
+      (p) => p.price >= priceRange[0] && p.price <= priceRange[1]
+    );
 
     // Bedrooms filter
-    if (bedrooms) {
-      filtered = filtered.filter(p => p.bedrooms >= parseInt(bedrooms));
+    if (bedrooms && bedrooms !== 'all') {
+      filtered = filtered.filter((p) => p.bedrooms >= parseInt(bedrooms));
     }
 
     // Bathrooms filter
-    if (bathrooms) {
-      filtered = filtered.filter(p => p.bathrooms >= parseInt(bathrooms));
+    if (bathrooms && bathrooms !== 'all') {
+      filtered = filtered.filter((p) => p.bathrooms >= parseInt(bathrooms));
     }
 
     // Amenities filter
     if (selectedAmenities.length > 0) {
-      filtered = filtered.filter(p =>
-        selectedAmenities.every(amenity => p.amenities?.includes(amenity))
+      filtered = filtered.filter((p) =>
+        selectedAmenities.every((amenity) => p.amenities?.includes(amenity))
       );
     }
 
@@ -107,27 +138,40 @@ const Properties = () => {
         break;
       case 'newest':
       default:
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
     }
 
     setFilteredProperties(filtered);
-  }, [properties, searchQuery, selectedCity, selectedType, priceRange, bedrooms, bathrooms, selectedAmenities, sortBy]);
+  }, [
+    properties,
+    searchQuery,
+    selectedCity,
+    selectedType,
+    priceRange,
+    bedrooms,
+    bathrooms,
+    selectedAmenities,
+    sortBy,
+  ]);
 
   const clearFilters = () => {
     setSearchQuery('');
-    setSelectedCity('');
-    setSelectedType('');
+    setSelectedCity('all');
+    setSelectedType('all');
     setPriceRange([0, 10000000]);
-    setBedrooms('');
-    setBathrooms('');
+    setBedrooms('all');
+    setBathrooms('all');
     setSelectedAmenities([]);
     setSortBy('newest');
   };
 
   const toggleAmenity = (amenity: string) => {
-    setSelectedAmenities(prev =>
+    setSelectedAmenities((prev) =>
       prev.includes(amenity)
-        ? prev.filter(a => a !== amenity)
+        ? prev.filter((a) => a !== amenity)
         : [...prev, amenity]
     );
   };
@@ -142,41 +186,241 @@ const Properties = () => {
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Navbar />
-      
+
       {/* Header Section */}
-      <div className="gradient-primary text-white py-16">
-        <div className="container mx-auto px-4">
+      <div className="relative h-[85vh] min-h-[600px] overflow-hidden">
+        {/* Background Image Slideshow */}
+        <AnimatePresence mode="wait">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl mx-auto text-center"
+            key={Math.floor(Date.now() / 8000) % 5} // Change image every 8 seconds
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 2, ease: 'easeInOut' }}
+            className="absolute inset-0"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Discover Your Dream Home
-            </h1>
-            <p className="text-lg text-white/90 mb-8">
-              Browse through {properties.length} verified properties across Nigeria
-            </p>
-            
-            {/* Search Bar */}
-            <div className="bg-white rounded-2xl p-4 shadow-2xl">
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by location, property name..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 h-12 text-lg"
-                  />
-                </div>
-                <Button size="lg" className="gradient-primary px-8">
-                  <Search className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
+            <div
+              className="absolute inset-0 bg-cover bg-center animate-ken-burns"
+              style={{
+                backgroundImage: `url(https://images.unsplash.com/photo-${
+                  1600000000000 + (Math.floor(Date.now() / 8000) % 5) * 100000
+                }?w=1920&h=1080&fit=crop)`,
+              }}
+            />
           </motion.div>
+        </AnimatePresence>
+
+        {/* Multiple Overlay Gradients for Depth */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-secondary/20" />
+
+        {/* Floating Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div
+            animate={{
+              y: [0, -20, 0],
+              x: [0, 10, 0],
+              rotate: [0, 5, 0],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"
+          />
+          <motion.div
+            animate={{
+              y: [0, 15, 0],
+              x: [0, -15, 0],
+              rotate: [0, -3, 0],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 2,
+            }}
+            className="absolute bottom-32 right-16 w-32 h-32 bg-secondary/20 rounded-full blur-2xl"
+          />
+          <motion.div
+            animate={{
+              y: [0, -10, 0],
+              x: [0, 8, 0],
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 1,
+            }}
+            className="absolute top-1/2 left-1/4 w-16 h-16 bg-primary/15 rounded-full blur-lg"
+          />
         </div>
+
+        <div className="relative h-full flex flex-col justify-center py-16">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="max-w-6xl mx-auto"
+            >
+              {/* Premium Badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-medium mb-8 border border-white/20 shadow-2xl"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                >
+                  <Home className="w-3 h-3" />
+                </motion.div>
+                <span>Premium Properties Collection</span>
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-1.5 h-1.5 bg-success rounded-full"
+                />
+              </motion.div>
+
+              {/* Main Heading */}
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 text-white leading-tight"
+              >
+                Discover Your
+                <motion.span
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.9 }}
+                  className="block bg-gradient-to-r from-secondary via-yellow-300 to-secondary bg-clip-text text-transparent"
+                >
+                  Dream Home
+                </motion.span>
+              </motion.h1>
+
+              {/* Subtitle */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.1 }}
+                className="text-sm md:text-base text-white/90 mb-6 max-w-3xl leading-relaxed font-light"
+              >
+                Browse through{' '}
+                <span className="font-semibold text-secondary">
+                  {properties.length}
+                </span>{' '}
+                verified properties across Nigeria. Find the perfect home with
+                our trusted escrow protection system.
+              </motion.p>
+
+              {/* Enhanced Search Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.3 }}
+                className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white/30 max-w-4xl mx-auto"
+              >
+                <div className="flex flex-col lg:flex-row gap-6">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by location, property name..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-12 h-12 text-base border-0 bg-white/50 focus:bg-white transition-colors placeholder:text-muted-foreground/70 rounded-xl"
+                    />
+                  </div>
+                  <Button
+                    size="lg"
+                    className="gradient-primary h-12 px-8 text-base font-semibold hover:scale-105 transition-all duration-300 shadow-xl rounded-xl"
+                  >
+                    <Search className="w-4 h-4 mr-2" />
+                    Search Properties
+                  </Button>
+                </div>
+
+                {/* Quick Stats with Enhanced Design */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5 }}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-8 border-t border-white/20"
+                >
+                  <div className="text-center group">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20"
+                    >
+                      <div className="text-2xl font-bold text-primary mb-1 group-hover:text-secondary transition-colors">
+                        {properties.length}
+                      </div>
+                      <div className="text-xs text-muted-foreground font-medium">
+                        Total Properties
+                      </div>
+                    </motion.div>
+                  </div>
+                  <div className="text-center group">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20"
+                    >
+                      <div className="text-2xl font-bold text-secondary mb-1 group-hover:text-primary transition-colors">
+                        {
+                          properties.filter((p) => p.status === 'available')
+                            .length
+                        }
+                      </div>
+                      <div className="text-xs text-muted-foreground font-medium">
+                        Available Now
+                      </div>
+                    </motion.div>
+                  </div>
+                  <div className="text-center group">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20"
+                    >
+                      <div className="text-2xl font-bold text-success mb-1 group-hover:text-secondary transition-colors">
+                        {properties.filter((p) => p.featured).length}
+                      </div>
+                      <div className="text-xs text-muted-foreground font-medium">
+                        Featured
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        >
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-8 h-12 border-2 border-white/50 rounded-full flex items-start justify-center p-2 backdrop-blur-sm bg-white/10"
+          >
+            <motion.div
+              animate={{ y: [0, 16, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-1 h-3 bg-white rounded-full"
+            />
+          </motion.div>
+        </motion.div>
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-8">
@@ -204,15 +448,22 @@ const Properties = () => {
                   <div className="space-y-6">
                     {/* Location */}
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">Location</label>
-                      <Select value={selectedCity} onValueChange={setSelectedCity}>
+                      <label className="text-sm font-semibold mb-2 block">
+                        Location
+                      </label>
+                      <Select
+                        value={selectedCity}
+                        onValueChange={setSelectedCity}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="All Cities" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Cities</SelectItem>
+                          <SelectItem value="all">All Cities</SelectItem>
                           {NIGERIAN_CITIES.map((city) => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                            <SelectItem key={city} value={city}>
+                              {city}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -220,13 +471,18 @@ const Properties = () => {
 
                     {/* Property Type */}
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">Property Type</label>
-                      <Select value={selectedType} onValueChange={setSelectedType}>
+                      <label className="text-sm font-semibold mb-2 block">
+                        Property Type
+                      </label>
+                      <Select
+                        value={selectedType}
+                        onValueChange={setSelectedType}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="All Types" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Types</SelectItem>
+                          <SelectItem value="all">All Types</SelectItem>
                           {PROPERTY_TYPES.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
@@ -239,7 +495,8 @@ const Properties = () => {
                     {/* Price Range */}
                     <div>
                       <label className="text-sm font-semibold mb-2 block">
-                        Price Range: {formatCurrency(priceRange[0])} - {formatCurrency(priceRange[1])}
+                        Price Range: {formatCurrency(priceRange[0])} -{' '}
+                        {formatCurrency(priceRange[1])}
                       </label>
                       <Slider
                         min={0}
@@ -253,13 +510,15 @@ const Properties = () => {
 
                     {/* Bedrooms */}
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">Min Bedrooms</label>
+                      <label className="text-sm font-semibold mb-2 block">
+                        Min Bedrooms
+                      </label>
                       <Select value={bedrooms} onValueChange={setBedrooms}>
                         <SelectTrigger>
                           <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any</SelectItem>
+                          <SelectItem value="all">Any</SelectItem>
                           <SelectItem value="1">1+</SelectItem>
                           <SelectItem value="2">2+</SelectItem>
                           <SelectItem value="3">3+</SelectItem>
@@ -271,13 +530,15 @@ const Properties = () => {
 
                     {/* Bathrooms */}
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">Min Bathrooms</label>
+                      <label className="text-sm font-semibold mb-2 block">
+                        Min Bathrooms
+                      </label>
                       <Select value={bathrooms} onValueChange={setBathrooms}>
                         <SelectTrigger>
                           <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any</SelectItem>
+                          <SelectItem value="all">Any</SelectItem>
                           <SelectItem value="1">1+</SelectItem>
                           <SelectItem value="2">2+</SelectItem>
                           <SelectItem value="3">3+</SelectItem>
@@ -288,12 +549,18 @@ const Properties = () => {
 
                     {/* Amenities */}
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">Amenities</label>
+                      <label className="text-sm font-semibold mb-2 block">
+                        Amenities
+                      </label>
                       <div className="flex flex-wrap gap-2">
                         {PROPERTY_AMENITIES.slice(0, 8).map((amenity) => (
                           <Badge
                             key={amenity}
-                            variant={selectedAmenities.includes(amenity) ? 'default' : 'outline'}
+                            variant={
+                              selectedAmenities.includes(amenity)
+                                ? 'default'
+                                : 'outline'
+                            }
                             className="cursor-pointer hover:scale-105 transition-transform"
                             onClick={() => toggleAmenity(amenity)}
                           >
@@ -323,7 +590,10 @@ const Properties = () => {
                   Filters
                 </Button>
                 <p className="text-muted-foreground">
-                  <span className="font-semibold text-foreground">{filteredProperties.length}</span> properties found
+                  <span className="font-semibold text-foreground">
+                    {filteredProperties.length}
+                  </span>{' '}
+                  properties found
                 </p>
               </div>
 
@@ -335,8 +605,12 @@ const Properties = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="newest">Newest First</SelectItem>
-                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                    <SelectItem value="price-low">
+                      Price: Low to High
+                    </SelectItem>
+                    <SelectItem value="price-high">
+                      Price: High to Low
+                    </SelectItem>
                     <SelectItem value="popular">Most Popular</SelectItem>
                   </SelectContent>
                 </Select>
@@ -366,7 +640,9 @@ const Properties = () => {
               <Card className="p-12 text-center">
                 <div className="max-w-md mx-auto">
                   <Home className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-bold mb-2">No properties found</h3>
+                  <h3 className="text-xl font-bold mb-2">
+                    No properties found
+                  </h3>
                   <p className="text-muted-foreground mb-4">
                     Try adjusting your filters or search criteria
                   </p>
@@ -374,10 +650,13 @@ const Properties = () => {
                 </div>
               </Card>
             ) : (
-              <div className={viewMode === 'grid' 
-                ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' 
-                : 'space-y-6'
-              }>
+              <div
+                className={
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
+                    : 'space-y-6'
+                }
+              >
                 {filteredProperties.map((property, index) => (
                   <motion.div
                     key={property.id}
@@ -385,83 +664,160 @@ const Properties = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className="overflow-hidden group cursor-pointer hover:shadow-2xl transition-all duration-300">
+                    <Card className="overflow-hidden group cursor-pointer hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:shadow-primary/10 bg-white/95 backdrop-blur-sm">
                       <div className={viewMode === 'grid' ? '' : 'md:flex'}>
-                        <div className={`relative overflow-hidden bg-muted ${viewMode === 'grid' ? 'h-64' : 'md:w-80 h-64'}`}>
+                        <div
+                          className={`relative overflow-hidden bg-gradient-to-br from-muted to-muted/50 ${
+                            viewMode === 'grid' ? 'h-64' : 'md:w-80 h-64'
+                          }`}
+                        >
                           <img
                             src={getPropertyImage(property)}
                             alt={property.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
                             loading="lazy"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              target.src = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&q=80';
+                              target.src =
+                                'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&q=80';
                             }}
                           />
+
+                          {/* Overlay gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                          {/* Featured badge */}
+                          {property.featured && (
+                            <div className="absolute top-4 left-4">
+                              <Badge className="bg-gradient-to-r from-secondary to-secondary/80 text-white border-0 shadow-lg">
+                                <span className="text-xs font-bold">
+                                  FEATURED
+                                </span>
+                              </Badge>
+                            </div>
+                          )}
+
+                          {/* Heart button */}
                           <div className="absolute top-4 right-4">
                             <Button
                               size="icon"
                               variant="secondary"
-                              className="rounded-full shadow-lg hover:scale-110 transition-transform"
+                              className="rounded-full shadow-lg hover:scale-110 transition-all duration-300 bg-white/90 hover:bg-white backdrop-blur-sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSaveProperty(property.id);
                               }}
                             >
                               <Heart
-                                className={`w-4 h-4 ${
-                                  savedProperties.includes(property.id) ? 'fill-destructive text-destructive' : ''
+                                className={`w-4 h-4 transition-colors duration-300 ${
+                                  savedProperties.includes(property.id)
+                                    ? 'fill-destructive text-destructive'
+                                    : 'text-muted-foreground group-hover:text-destructive'
                                 }`}
                               />
                             </Button>
                           </div>
+
+                          {/* Price badge */}
                           <div className="absolute bottom-4 left-4">
-                            <Badge className="bg-secondary text-white text-base px-4 py-1 font-semibold">
-                              {formatCurrency(property.price)}/{property.priceType === 'yearly' ? 'year' : 'month'}
+                            <Badge className="bg-gradient-to-r from-primary to-primary-dark text-white border-0 shadow-lg text-base px-4 py-2 font-bold">
+                              {formatCurrency(property.price)}/
+                              {property.priceType === 'yearly'
+                                ? 'year'
+                                : 'month'}
                             </Badge>
+                          </div>
+
+                          {/* Status indicator */}
+                          <div className="absolute bottom-4 right-4">
+                            <div
+                              className={`w-3 h-3 rounded-full shadow-lg ${
+                                property.status === 'available'
+                                  ? 'bg-success animate-pulse'
+                                  : 'bg-muted-foreground'
+                              }`}
+                            />
                           </div>
                         </div>
 
                         <div className="p-6 flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="text-xl font-bold line-clamp-1 flex-1">{property.title}</h3>
-                            <Badge variant="outline" className="ml-2">
-                              {PROPERTY_TYPES.find(t => t.value === property.propertyType)?.label}
+                          <div className="flex items-start justify-between mb-3">
+                            <h3 className="text-xl font-bold line-clamp-1 flex-1 text-foreground group-hover:text-primary transition-colors duration-300">
+                              {property.title}
+                            </h3>
+                            <Badge
+                              variant="outline"
+                              className="ml-2 border-primary/20 text-primary bg-primary/5"
+                            >
+                              {
+                                PROPERTY_TYPES.find(
+                                  (t) => t.value === property.propertyType
+                                )?.label
+                              }
                             </Badge>
                           </div>
-                          
+
                           <div className="flex items-center text-muted-foreground mb-4">
-                            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-                            <span className="text-sm line-clamp-1">{property.address}</span>
+                            <MapPin className="w-4 h-4 mr-2 flex-shrink-0 text-primary/60" />
+                            <span className="text-sm line-clamp-1 font-medium">
+                              {property.address}
+                            </span>
                           </div>
 
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                          <p className="text-sm text-muted-foreground mb-5 line-clamp-2 leading-relaxed">
                             {property.description}
                           </p>
 
-                          <div className="flex items-center gap-4 mb-4 flex-wrap">
-                            <div className="flex items-center gap-1">
-                              <Bed className="w-4 h-4 text-muted-foreground" />
-                              <span className="text-sm font-medium">{property.bedrooms} Beds</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Bath className="w-4 h-4 text-muted-foreground" />
-                              <span className="text-sm font-medium">{property.bathrooms} Baths</span>
-                            </div>
-                            {property.size && (
-                              <span className="text-sm text-muted-foreground font-medium">
-                                {property.size} sqm
+                          {/* Property features */}
+                          <div className="grid grid-cols-2 gap-3 mb-5">
+                            <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-2">
+                              <Bed className="w-4 h-4 text-primary" />
+                              <span className="text-sm font-semibold text-foreground">
+                                {property.bedrooms} Beds
                               </span>
-                            )}
+                            </div>
+                            <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-2">
+                              <Bath className="w-4 h-4 text-primary" />
+                              <span className="text-sm font-semibold text-foreground">
+                                {property.bathrooms} Baths
+                              </span>
+                            </div>
                           </div>
 
+                          {/* Amenities preview */}
+                          {property.amenities &&
+                            property.amenities.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-5">
+                                {property.amenities
+                                  .slice(0, 3)
+                                  .map((amenity, idx) => (
+                                    <Badge
+                                      key={idx}
+                                      variant="secondary"
+                                      className="text-xs bg-secondary/10 text-secondary border-secondary/20"
+                                    >
+                                      {amenity}
+                                    </Badge>
+                                  ))}
+                                {property.amenities.length > 3 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs bg-muted text-muted-foreground"
+                                  >
+                                    +{property.amenities.length - 3} more
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+
                           <Button
-                            className="w-full group-hover:gradient-primary transition-all"
-                            variant="outline"
-                            onClick={() => navigate(`/properties/${property.id}`)}
+                            className="w-full gradient-primary hover:shadow-lg transition-all duration-300 font-semibold group-hover:scale-[1.02]"
+                            onClick={() =>
+                              navigate(`/properties/${property.id}`)
+                            }
                           >
                             View Details
-                            <ArrowRight className="w-4 h-4 ml-2" />
+                            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                           </Button>
                         </div>
                       </div>

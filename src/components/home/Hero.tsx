@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import { Search, MapPin, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { NIGERIAN_CITIES, PROPERTY_TYPES } from '@/utils/constants';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -72,12 +78,15 @@ export const Hero = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-4xl mx-auto text-center text-white"
           >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-2xl">
-              Find Your Perfect Home,<br />
-              <span className="text-secondary">Pay Safely</span> with Escrow Protection
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-2xl">
+              Find Your Perfect Home,
+              <br />
+              <span className="text-secondary">Pay Safely</span> with Escrow
+              Protection
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-lg">
-              Connect with verified landlords. Secure payments. Guaranteed peace of mind.
+              Connect with verified landlords. Secure payments. Guaranteed peace
+              of mind.
             </p>
 
             {/* Search Bar */}
@@ -87,7 +96,10 @@ export const Hero = () => {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
                   <Select value={location} onValueChange={setLocation}>
                     <SelectTrigger className="pl-10 text-foreground bg-background">
-                      <SelectValue placeholder="Location" className="text-foreground" />
+                      <SelectValue
+                        placeholder="Location"
+                        className="text-foreground"
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {NIGERIAN_CITIES.map((city) => (
@@ -103,7 +115,10 @@ export const Hero = () => {
                   <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
                   <Select value={propertyType} onValueChange={setPropertyType}>
                     <SelectTrigger className="pl-10 text-foreground bg-background">
-                      <SelectValue placeholder="Property Type" className="text-foreground" />
+                      <SelectValue
+                        placeholder="Property Type"
+                        className="text-foreground"
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {PROPERTY_TYPES.map((type) => (
@@ -116,17 +131,26 @@ export const Hero = () => {
                 </div>
 
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground z-10">₦</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground z-10">
+                    ₦
+                  </span>
                   <Select value={priceRange} onValueChange={setPriceRange}>
                     <SelectTrigger className="pl-10 text-foreground bg-background">
-                      <SelectValue placeholder="Price Range" className="text-foreground" />
+                      <SelectValue
+                        placeholder="Price Range"
+                        className="text-foreground"
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="0-500000">Under ₦500k</SelectItem>
-                      <SelectItem value="500000-1000000">₦500k - ₦1M</SelectItem>
+                      <SelectItem value="500000-1000000">
+                        ₦500k - ₦1M
+                      </SelectItem>
                       <SelectItem value="1000000-2000000">₦1M - ₦2M</SelectItem>
                       <SelectItem value="2000000-5000000">₦2M - ₦5M</SelectItem>
-                      <SelectItem value="5000000-999999999">Above ₦5M</SelectItem>
+                      <SelectItem value="5000000-999999999">
+                        Above ₦5M
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
